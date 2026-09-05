@@ -1,1 +1,7 @@
+__pycache__/
+.vscode
+
 info.txt
+docs/other
+
+trace

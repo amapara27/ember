@@ -1,0 +1,6 @@
+{
+  "repo": "Qwen/Qwen3.5-0.8B",
+  "revision": "2fc06364715b967f1860aea9cf38778875588b17",
+  "prompt": "The capital of France is Paris. The capital of Japan is",
+  "expected_params": 800000000
+}

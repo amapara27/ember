@@ -5,9 +5,9 @@ from math import prod
 from pathlib import Path
 from huggingface_hub import snapshot_download
 
-REPO = "Qwen/Qwen3.5-0.8B"
-REVISION = "2fc06364715b967f1860aea9cf38778875588b17"
-EXPECTED_PARAMS = 800000000
+CONST = json.loads((Path(__file__).parent / "constants.json").read_text())
+REPO, REVISION = CONST["repo"], CONST["revision"]
+EXPECTED_PARAMS = CONST["expected_params"]
 
 DTYPE_BYTES = {"F64": 8, "F32": 4, "F16": 2, "BF16": 2, "I64": 8, "I32": 4,
                "I16": 2, "I8": 1, "U8": 1, "BOOL": 1, "F8_E4M3": 1, "F8_E5M2": 1}

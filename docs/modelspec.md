@@ -137,14 +137,34 @@ sequence length. Conv state per layer: 6144 × 3 = 18,432 floats.
 `embed_tokens` [248320, 1024]. **No `lm_head.weight` — tying is real** (`tie_word_embeddings: true` `[c]`), the
 loader must alias the embedding. Final norm `model.language_model.norm` [1024].
 
+## Tolerance floor `[v]`
+
+HF against itself on the canary prompt, fp32 CPU: batched prefill vs
+token-by-token decode carrying the KV cache and the DeltaNet conv/recurrent
+state. Final-position logits (248,320 wide, absmax 18.44):
+
+| | |
+|---|---|
+| max-abs | 4.20e-5 |
+| mean-abs | 6.05e-6 |
+| relative Frobenius | 1.51e-6 |
+| argmax / top-5 | identical |
+
+**Anything at or under ~4e-5 max-abs on the logits is numerics, not a bug.**
+Two of HF's own kernels disagree by that much — the DeltaNet chunked kernel vs
+the recurrent one, plus differently ordered matmuls. Budget an order of
+magnitude above it as the pass threshold and chase real divergence, which shows
+up orders larger. Top-1 margin here is 3.38, ~80,000x the floor, so token
+agreement is a weak check; compare logits.
+
+Regenerate with `python tolerance.py` → `trace/tolerance.json`.
+
 ---
 
 ## Unknowns
 
 **Norms & tolerance**
 - Which norm tensors use `(1+w)` vs plain `w`. Load them all, print the means.
-- Tolerance floor: max-abs and relative-Frobenius gap between HF's prefill path
-  and its token-by-token decode path on the canary prompt.
 
 **FFN**
 - Confirm SiLU is on the gate branch, not the up branch.
